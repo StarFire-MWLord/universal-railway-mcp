@@ -84,6 +84,7 @@ async def health(request):
 
 # ---------------------------------------------------------------------------
 # Entry point — Railway-compatible via uvicorn + ASGI app
+# streamable_http_app() already serves MCP at /mcp
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
     print(f"Starting {SERVER_NAME} on 0.0.0.0:{PORT}")
@@ -94,7 +95,7 @@ if __name__ == "__main__":
     app = Starlette(
         routes=[
             Route("/", health),
-            Mount("/mcp", app=mcp_app),
+            Mount("/", app=mcp_app),
         ]
     )
     uvicorn.run(app, host="0.0.0.0", port=PORT)
