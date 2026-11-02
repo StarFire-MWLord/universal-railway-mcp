@@ -9,6 +9,7 @@ import datetime
 from pathlib import Path
 import uvicorn
 from mcp.server.fastmcp import FastMCP
+from mcp.server.transport_security import TransportSecuritySettings
 
 # ---------------------------------------------------------------------------
 # Configuration — system prompt from file by default
@@ -33,9 +34,15 @@ SERVER_NAME = os.getenv("SERVER_NAME", "Universal MCP Server")
 PORT = int(os.getenv("PORT", "8000"))
 
 # ---------------------------------------------------------------------------
-# MCP Server (FastMCP)
+# MCP Server (FastMCP) — disable host header check for Railway
 # ---------------------------------------------------------------------------
-mcp = FastMCP(SERVER_NAME, stateless_http=True)
+mcp = FastMCP(
+    SERVER_NAME,
+    stateless_http=True,
+    transport_security=TransportSecuritySettings(
+        enable_dns_rebinding_protection=False,
+    ),
+)
 
 @mcp.prompt(name="enforced_system")
 def enforced_system_prompt() -> str:
