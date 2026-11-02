@@ -73,16 +73,12 @@ def list_available_prompts() -> str:
     return "Available prompts: enforced_system (mandatory system prompt). Read it via the prompt or the system://prompt resource."
 
 # ---------------------------------------------------------------------------
-# Entry point — Railway-compatible
+# Entry point — Railway-compatible (mcp < 2)
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
-    print(f"Starting {SERVER_NAME} on 0.0.0.0:{PORT}")
+    print(f"Starting {SERVER_NAME} on port {PORT}")
     print(f"System prompt length: {len(SYSTEM_PROMPT)}")
     print(f"Prompt source: {'file' if PROMPT_FILE.exists() and not os.getenv('SYSTEM_PROMPT') else 'env/fallback'}")
     print("MCP endpoint: /mcp")
-    mcp.run(
-        transport="streamable-http",
-        host="0.0.0.0",
-        port=PORT,
-        path="/mcp",
-    )
+    # mcp < 2 FastMCP.run does not accept host/path kwargs
+    mcp.run(transport="streamable-http", port=PORT)
