@@ -8,6 +8,9 @@ import os
 import datetime
 from pathlib import Path
 import uvicorn
+from starlette.applications import Starlette
+from starlette.responses import PlainTextResponse
+from starlette.routing import Mount, Route
 from mcp.server.fastmcp import FastMCP
 
 # ---------------------------------------------------------------------------
@@ -74,6 +77,12 @@ def list_available_prompts() -> str:
     return "Available prompts: enforced_system (mandatory system prompt). Read it via the prompt or the system://prompt resource."
 
 # ---------------------------------------------------------------------------
+# Health endpoint so Railway routes the service
+# ---------------------------------------------------------------------------
+async def health(request):
+    return PlainTextResponse("OK")
+
+# ---------------------------------------------------------------------------
 # Entry point — Railway-compatible via uvicorn + ASGI app
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
@@ -81,5 +90,11 @@ if __name__ == "__main__":
     print(f"System prompt length: {len(SYSTEM_PROMPT)}")
     print(f"Prompt source: {'file' if PROMPT_FILE.exists() and not os.getenv('SYSTEM_PROMPT') else 'env/fallback'}")
     print("MCP endpoint: /mcp")
-    app = mcp.streamable_http_app()
+    mcp_app = mcp.streamable_http_app()
+    app = Starlette(
+        routes=[
+            Route("/", health),
+            Mount("/mcp", app=mcp_app),
+        ]
+    )
     uvicorn.run(app, host="0.0.0.0", port=PORT)
